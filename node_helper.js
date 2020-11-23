@@ -38,7 +38,7 @@ module.exports = NodeHelper.create({
 						stockResults.push(JSON.parse(body));
 						counter++;
 
-						if (counter == count - 1) {
+						if (counter === count) {
 							self.sendSocketNotification(
 								'STOCKS_RESULT',
 								stockResults

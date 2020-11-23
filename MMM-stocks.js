@@ -68,10 +68,7 @@ Module.register('MMM-stocks', {
 				changeElement.innerHTML = ' ' + change;
 
 				var divider = document.createElement('span');
-
-				if (count < _this.result.length - 1) {
-					divider.innerHTML = separator;
-				}
+				divider.innerHTML = separator;
 
 				wrapper.appendChild(priceElement);
 				wrapper.appendChild(changeElement);
@@ -82,11 +79,6 @@ Module.register('MMM-stocks', {
 
 		for (var i = 0; i < 10; i++) {
 			wrapper.innerHTML += wrapper.innerHTML;
-
-			var divider = document.createElement('span');
-			if (count < 9) {
-				divider.innerHTML = separator;
-			}
 		}
 
 		return wrapper;
