@@ -34,19 +34,22 @@ module.exports = NodeHelper.create({
 			request(
 				{ url: url, method: 'GET' },
 				function (error, response, body) {
-					if (!error && response.statusCode == 200) {
-						stockResults.push(JSON.parse(body));
-						counter++;
+					if (error) {
+						console.error(error);
+						return;
+					}
+					if (response.statusCode != 200) {
+						console.error(response);
+						return;
+					}
+					stockResults.push(JSON.parse(body));
+					counter++;
 
-						if (counter === count) {
-							self.sendSocketNotification(
-								'STOCKS_RESULT',
-								stockResults
-							);
-						}
-					} else {
-						var err = error;
-						throw new Error(err);
+					if (counter === count) {
+						self.sendSocketNotification(
+							'STOCKS_RESULT',
+							stockResults
+						);
 					}
 				}
 			);
