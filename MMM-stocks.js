@@ -42,7 +42,9 @@ Module.register('MMM-stocks', {
 				var changeElement = document.createElement('span');
 				var symbol = stock.symbol;
 				var lastPrice = stock.latestPrice;
-				var changePercentage = stock.changePercent;
+				var changePercentage = stock.changePercent
+					? stock.changePercent
+					: lastPrice / stock.previousClose - 1;
 				//var changeValue = stock.change;
 
 				symbolElement.className = 'stock__stock--symbol';
@@ -56,8 +58,10 @@ Module.register('MMM-stocks', {
 
 				if (changePercentage > 0) {
 					changeElement.classList += ' up';
-				} else {
+				} else if (changePercentage < 0) {
 					changeElement.classList += ' down';
+				} else {
+					changeElement.classList += ' equal';
 				}
 
 				//var change = Math.abs(changeValue);
