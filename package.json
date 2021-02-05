@@ -28,8 +28,5 @@
 		"url": "https://github.com/Elaniobro/mmm-stocks/issues"
 	},
 	"homepage": "https://github.com/Elaniobro/mmm-stocks#readme",
-	"dependencies": {
-		"moment-business": "^3.0.1",
-		"moment-timezone": "^0.5.32"
-	}
+	"dependencies": {}
 }

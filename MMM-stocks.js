@@ -6,9 +6,6 @@
  */
 'use strict';
 
-var moment = require('moment-timezone');
-var business = require('moment-business');
-
 Module.register('MMM-stocks', {
 	/*eslint-disable-line*/ result: [],
 	// Default module config.
@@ -24,7 +21,16 @@ Module.register('MMM-stocks', {
 		return ['stocks.css'];
 	},
 
+	getScripts: function () {
+		return [
+			'moment.js',
+			'moment-timezone-with-data.js',
+			'moment-business.js',
+		];
+	},
+
 	start: function () {
+		this.hasDomInitialized = false;
 		this.getStocks();
 		this.scheduleUpdate();
 	},
@@ -50,9 +56,12 @@ Module.register('MMM-stocks', {
 					: lastPrice / stock.previousClose - 1;
 				//var changeValue = stock.change;
 
-				symbolElement.className = 'stock__stock--symbol';
-				priceElement.className = 'stock__stock--price';
-				changeElement.className = 'stock__stock--change';
+				symbolElement.className =
+					'stock__stock--symbol stock__stock--symbol_' + symbol;
+				priceElement.className =
+					'stock__stock--price stock__stock--price_' + symbol;
+				changeElement.className =
+					'stock__stock--change stock__stock--change_' + symbol;
 				symbolElement.innerHTML = symbol + ' ';
 				wrapper.appendChild(symbolElement);
 
@@ -60,11 +69,11 @@ Module.register('MMM-stocks', {
 					'$' + _this.formatMoney(lastPrice, 2, '.', ',');
 
 				if (changePercentage > 0) {
-					changeElement.classList += ' up';
+					changeElement.classList.add('up');
 				} else if (changePercentage < 0) {
-					changeElement.classList += ' down';
+					changeElement.classList.add('down');
 				} else {
-					changeElement.classList += ' equal';
+					changeElement.classList.add('equal');
 				}
 
 				//var change = Math.abs(changeValue);
@@ -89,6 +98,50 @@ Module.register('MMM-stocks', {
 		}
 
 		return wrapper;
+	},
+
+	updateDom0: function (speed) {
+		if (this.result.length > 0) {
+			this.result.forEach((stock) => {
+				var symbol = stock.symbol;
+				var lastPrice = stock.latestPrice;
+				var changePercentage = stock.changePercent
+					? stock.changePercent
+					: lastPrice / stock.previousClose - 1;
+
+				var elements = document.getElementsByClassName(
+					'stock__stock--price_' + symbol
+				);
+				for (var element of elements) {
+					element.innerHTML =
+						'$' + this.formatMoney(lastPrice, 2, '.', ',');
+				}
+
+				elements = document.getElementsByClassName(
+					'stock__stock--change_' + symbol
+				);
+				for (var element of elements) {
+					element.classList.remove('up');
+					element.classList.remove('down');
+					element.classList.remove('equal');
+
+					if (changePercentage > 0) {
+						element.classList.add('up');
+					} else if (changePercentage < 0) {
+						element.classList.add('down');
+					} else {
+						element.classList.add('equal');
+					}
+
+					//var change = Math.abs(changeValue);
+					var change = `${(
+						Math.abs(changePercentage) * 100.0
+					).toFixed(2)}%`;
+
+					element.innerHTML = ' ' + change;
+				}
+			});
+		}
 	},
 
 	formatMoney: function (amount, decimalCount, decimal, thousands) {
@@ -134,7 +187,7 @@ Module.register('MMM-stocks', {
 			if (
 				totalMinutes >= 9 * 60 + 25 &&
 				totalMinutes <= 16 * 60 + 5 &&
-				business.isWeekDay(easternTime)
+				momentBusiness.isWeekDay(easternTime)
 			) {
 				self.getStocks();
 			}
@@ -176,7 +229,12 @@ Module.register('MMM-stocks', {
 	socketNotificationReceived: function (notification, payload) {
 		if (notification === 'STOCKS_RESULT') {
 			this.result = payload;
-			this.updateDom(self.config.fadeSpeed);
+			if (this.hasDomInitialized) {
+				this.updateDom0();
+			} else {
+				this.updateDom(self.config.fadeSpeed);
+				this.hasDomInitialized = true;
+			}
 		}
 	},
 });
