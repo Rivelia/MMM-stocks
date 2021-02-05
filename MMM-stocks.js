@@ -6,6 +6,9 @@
  */
 'use strict';
 
+var moment = require('moment-timezone');
+var business = require('moment-business');
+
 Module.register('MMM-stocks', {
 	/*eslint-disable-line*/ result: [],
 	// Default module config.
@@ -124,7 +127,17 @@ Module.register('MMM-stocks', {
 
 		var self = this;
 		setInterval(function () {
-			self.getStocks();
+			var easternTime = moment().tz('America/New_York');
+			var totalMinutes = easternTime.hours() * 60 + easternTime.minutes();
+			// Opens: 9:30 a.m. to 4 p.m
+			// Range: 9:25 a.m. to 4:05 p.m
+			if (
+				totalMinutes >= 9 * 60 + 25 &&
+				totalMinutes <= 16 * 60 + 5 &&
+				business.isWeekDay(easternTime)
+			) {
+				self.getStocks();
+			}
 		}, nextLoad);
 	},
 
